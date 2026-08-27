@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: multi-agent-platform
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: AI_PROVIDER
+        value: openrouter
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: META_APP_ID
+        value: "1049495104392756"
+      - key: META_APP_SECRET
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        value: "1287317304459774"
+      - key: META_WEBHOOK_VERIFY_TOKEN
+        value: "agent_platform_webhook_verify_2024"
+      - key: API_URL
+        value: "https://multi-agent-platform.onrender.com"

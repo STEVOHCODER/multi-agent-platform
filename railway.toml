@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "cd saas/backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+startCommand = "cd saas/backend && pip install -r requirements.txt && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"

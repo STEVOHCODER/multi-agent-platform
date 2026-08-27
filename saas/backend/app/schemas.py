@@ -1,170 +1,18 @@
-from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel, EmailStr
+"""Backward compatibility — import from modules instead."""
+from app.modules.auth.schemas import UserRegister, UserLogin, UserResponse, TokenResponse
+from app.modules.messaging.schemas import (
+    EmailConnect, EmailConnectionResponse,
+    WhatsAppConnect, WhatsAppResponse,
+    RuleCreate, RuleUpdate, RuleResponse,
+    MessageLogResponse, DashboardResponse, UsageResponse,
+)
+from app.modules.billing.schemas import SubscriptionResponse
 
-
-# Auth
-class UserRegister(BaseModel):
-    email: str
-    password: str
-    name: str = ""
-
-
-class UserLogin(BaseModel):
-    email: str
-    password: str
-
-
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    user: "UserResponse"
-
-
-class UserResponse(BaseModel):
-    id: str
-    email: str
-    name: str
-    timezone: str
-    is_active: bool
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-# Email Connections
-class EmailConnect(BaseModel):
-    provider: str  # gmail, imap, outlook
-    email_address: str
-    password: Optional[str] = None  # For IMAP
-    imap_host: Optional[str] = None
-    imap_port: Optional[int] = None
-
-
-class EmailConnectionResponse(BaseModel):
-    id: str
-    provider: str
-    email_address: str
-    is_active: bool
-    last_sync_at: Optional[datetime]
-    last_error: Optional[str]
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-# WhatsApp
-class WhatsAppConnect(BaseModel):
-    phone_number: str
-    meta_phone_number_id: str
-    meta_access_token: str
-
-
-class WhatsAppResponse(BaseModel):
-    id: str
-    phone_number: str
-    is_active: bool
-    last_message_at: Optional[datetime]
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-# Forwarding Rules
-class RuleCreate(BaseModel):
-    name: str = "Default Rule"
-    sender_emails: List[str] = []
-    sender_domains: List[str] = []
-    subject_contains: List[str] = []
-    body_contains: List[str] = []
-    has_attachments: Optional[bool] = None
-    min_importance_score: int = 0
-    forward_to_whatsapp: bool = True
-    summarize_with_ai: bool = True
-
-
-class RuleUpdate(BaseModel):
-    name: Optional[str] = None
-    is_active: Optional[bool] = None
-    sender_emails: Optional[List[str]] = None
-    sender_domains: Optional[List[str]] = None
-    subject_contains: Optional[List[str]] = None
-    body_contains: Optional[List[str]] = None
-    has_attachments: Optional[bool] = None
-    min_importance_score: Optional[int] = None
-    forward_to_whatsapp: Optional[bool] = None
-    summarize_with_ai: Optional[bool] = None
-
-
-class RuleResponse(BaseModel):
-    id: str
-    name: str
-    is_active: bool
-    sender_emails: List[str]
-    sender_domains: List[str]
-    subject_contains: List[str]
-    body_contains: List[str]
-    has_attachments: Optional[bool]
-    min_importance_score: int
-    forward_to_whatsapp: bool
-    summarize_with_ai: bool
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-# Message Logs
-class MessageLogResponse(BaseModel):
-    id: str
-    email_subject: Optional[str]
-    email_sender: Optional[str]
-    email_received_at: Optional[datetime]
-    classification_score: float
-    summary: Optional[str]
-    forwarded: bool
-    delivery_status: str
-    delivery_error: Optional[str]
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
-
-
-# Dashboard
-class DashboardResponse(BaseModel):
-    status: str
-    email_connections: int
-    whatsapp_connected: bool
-    messages_today: int
-    messages_this_month: int
-    plan: str
-    recent_messages: List[MessageLogResponse]
-
-
-# Subscription
-class SubscriptionResponse(BaseModel):
-    plan: str
-    status: str
-    current_period_end: Optional[datetime]
-    emails_limit: int
-    emails_used: int
-
-    class Config:
-        from_attributes = True
-
-
-# Usage
-class UsageResponse(BaseModel):
-    emails_received: int
-    emails_processed: int
-    messages_forwarded: int
-    messages_failed: int
-    period_start: Optional[datetime]
-    period_end: Optional[datetime]
-
-    class Config:
-        from_attributes = True
+__all__ = [
+    "UserRegister", "UserLogin", "UserResponse", "TokenResponse",
+    "EmailConnect", "EmailConnectionResponse",
+    "WhatsAppConnect", "WhatsAppResponse",
+    "RuleCreate", "RuleUpdate", "RuleResponse",
+    "MessageLogResponse", "DashboardResponse", "UsageResponse",
+    "SubscriptionResponse",
+]

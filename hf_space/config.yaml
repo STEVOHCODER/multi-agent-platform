@@ -1,0 +1,31 @@
+email:
+  host: imap.gmail.com          # gmail | outlook.office365.com | imap.mail.yahoo.com
+  port: 993
+  mailbox: INBOX
+  lookback_hours: 24
+  batch_size: 25
+
+whatsapp:
+  provider: meta                # meta (Cloud API) or twilio
+  to_number: "+250786508880"    # primary recipient (must be verified with Meta once)
+  to_numbers: []                # extra recipients, e.g. ["+250781361789", "+254712345678"]
+                                # each must have joined the test number allow-list ONCE;
+                                # after that, adding them here is all it takes
+  meta_phone_number_id: "1287317304459774"      # Meta test number -> API Setup
+  twilio_from_number: "+14155238886"  # Twilio sandbox number when testing
+
+classifier:
+  min_score: 0                  # 0 = forward EVERY email; set 40 to only forward important ones
+  use_llm: true                 # Gemini 2.5 Flash scoring + summaries (key from env)
+  summarize: true               # attach a Gemini summary to every alert
+  vip_senders:
+    - boss@yourcompany.com
+  blocked_senders: []
+
+agent:
+  interval_seconds: 300         # used only when IDLE is unavailable (polling fallback)
+  idle_timeout_seconds: 1500    # IMAP IDLE heartbeat every 25 min
+  max_per_cycle: 50             # raised so bursts are never dropped
+  state_file: "state.json"
+  log_file: "logs/agent.log"
+  log_level: "INFO"

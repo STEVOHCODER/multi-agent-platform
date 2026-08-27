@@ -1,0 +1,15 @@
+export const S = {
+  page: { padding: 32, fontFamily: 'system-ui, sans-serif', maxWidth: 1200, margin: '0 auto' },
+  card: { background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', padding: 24, marginBottom: 16 },
+  h1: { fontSize: '1.5rem', fontWeight: 700, marginBottom: 24, color: '#111827' },
+  h2: { fontSize: '1.15rem', fontWeight: 600, marginBottom: 12, color: '#111827' },
+  btn: (bg = '#3b82f6', c = '#fff') => ({ padding: '8px 18px', background: bg, color: c, border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }),
+  input: { width: '100%', padding: 10, border: '1px solid #d1d5db', borderRadius: 8, fontSize: '0.9rem', boxSizing: 'border-box' },
+  label: { display: 'block', marginBottom: 4, fontSize: '0.85rem', color: '#6b7280', fontWeight: 500 },
+  select: { width: '100%', padding: 10, border: '1px solid #d1d5db', borderRadius: 8, fontSize: '0.9rem' },
+  badge: (bg, c) => ({ display: 'inline-block', padding: '2px 10px', borderRadius: 12, fontSize: '0.75rem', fontWeight: 600, background: bg, color: c }),
+  tag: { display: 'inline-block', padding: '3px 10px', borderRadius: 6, fontSize: '0.8rem', background: '#f3f4f6', color: '#374151', marginRight: 6, marginBottom: 4 },
+  empty: { padding: 40, textAlign: 'center', color: '#9ca3af' },
+  stat: { padding: 20, background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb' },
+  textarea: { width: '100%', padding: 10, border: '1px solid #d1d5db', borderRadius: 8, fontSize: '0.9rem', boxSizing: 'border-box', minHeight: 80, resize: 'vertical' },
+}

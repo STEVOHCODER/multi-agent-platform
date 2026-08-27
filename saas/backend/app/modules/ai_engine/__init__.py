@@ -159,11 +159,57 @@ class GoogleProvider(AIProvider):
         raise NotImplementedError("Google embeddings not yet implemented")
 
 
+class OpenRouterProvider(AIProvider):
+    def __init__(self, api_key: str = None):
+        self.api_key = api_key or os.getenv("OPENROUTER_API_KEY", "")
+
+    async def chat(self, messages, model=None, system_prompt=None, temperature=0.7, max_tokens=2000, tools=None):
+        import httpx
+        model = model or "meta-llama/llama-3.1-8b-instruct:free"
+        msgs = []
+        if system_prompt:
+            msgs.append({"role": "system", "content": system_prompt})
+        msgs.extend(messages)
+
+        payload = {"model": model, "messages": msgs, "temperature": temperature, "max_tokens": max_tokens}
+        if tools:
+            payload["tools"] = tools
+            payload["tool_choice"] = "auto"
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                json=payload,
+                headers={
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json",
+                    "HTTP-Referer": "https://multi-agent-platform.local",
+                    "X-Title": "Multi-Agent Platform",
+                },
+                timeout=30,
+            )
+            data = resp.json()
+            if "error" in data:
+                raise Exception(data["error"].get("message", "OpenRouter error"))
+
+            choice = data["choices"][0]
+            return {
+                "content": choice["message"].get("content", ""),
+                "tool_calls": choice["message"].get("tool_calls", []),
+                "usage": data.get("usage", {}),
+                "model": data.get("model", model),
+            }
+
+    async def embed(self, texts, model=None):
+        raise NotImplementedError("OpenRouter does not provide embeddings API")
+
+
 # ── Provider factory ──────────────────────────────────────────────
 PROVIDERS = {
     "openai": OpenAIProvider,
     "anthropic": AnthropicProvider,
     "google": GoogleProvider,
+    "openrouter": OpenRouterProvider,
 }
 
 

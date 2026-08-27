@@ -244,36 +244,60 @@ async def send_agent_message(
 
     message_text = data.get("message", "")
 
-    # Simple AI call directly
-    provider = get_provider()
-    system_prompt = agent.system_instructions or "You are a helpful AI assistant."
-    system_prompt += "\n\nBe concise and helpful."
+    # AI call with fallback: Google -> OpenRouter
+    system_prompt = agent.system_instructions or "You are a helpful AI assistant for a business. Help customers with their inquiries about orders, products, services, and support. Be professional, friendly, and concise."
+    system_prompt += "\n\nBe concise and helpful. If you don't know something specific about the business, acknowledge it and offer to connect them with a human agent."
 
+    response_text = None
+
+    # Try Google first
     try:
+        from app.modules.ai_engine import GoogleProvider
+        provider = GoogleProvider()
         result = await provider.chat(
             messages=[{"role": "user", "content": message_text}],
-            model=agent.model or "gemini-2.5-flash",
+            model="gemini-2.5-flash",
             system_prompt=system_prompt,
             max_tokens=500,
         )
-        response_text = result.get("content", "No response")
+        response_text = result.get("content")
     except Exception as e:
-        # Fallback to rule-based response when AI quota exceeded
+        print(f"Google failed: {e}")
+
+    # Fallback to OpenRouter
+    if not response_text:
+        try:
+            from app.modules.ai_engine import OpenRouterProvider
+            provider = OpenRouterProvider()
+            result = await provider.chat(
+                messages=[{"role": "user", "content": message_text}],
+                model="nvidia/nemotron-3.5-lightning:free",
+                system_prompt=system_prompt,
+                max_tokens=500,
+            )
+            response_text = result.get("content")
+        except Exception as e:
+            print(f"OpenRouter failed: {e}")
+
+    # Final fallback: rule-based
+    if not response_text:
         msg_lower = message_text.lower()
         if any(w in msg_lower for w in ["hello", "hi", "hey"]):
-            response_text = "Hello! Welcome to customer support. How can I help you today?"
-        elif any(w in msg_lower for w in ["order", "where", "package", "delivery"]):
+            response_text = "Hello! Welcome to our customer support. How can I help you today?"
+        elif any(w in msg_lower for w in ["order", "where", "package", "delivery", "shipping"]):
             response_text = "I can help with order inquiries. Please provide your order number and I'll check the status for you."
         elif any(w in msg_lower for w in ["refund", "money back", "return"]):
             response_text = "For refund requests, I'll need your order number and reason for the refund. Our policy allows returns within 30 days of purchase."
         elif any(w in msg_lower for w in ["help", "support", "issue", "problem"]):
             response_text = "I'm here to help! Please describe your issue and I'll assist you right away."
-        elif any(w in msg_lower for w in ["product", "price", "cost", "buy"]):
-            response_text = "I can help with product information. What product are you interested in?"
-        elif any(w in msg_lower for w in ["policy", "terms", "warranty"]):
-            response_text = "Our return policy allows returns within 30 days. Items must be in original condition. Would you like more details?"
+        elif any(w in msg_lower for w in ["product", "price", "cost", "buy", "service"]):
+            response_text = "I can help with product and service information. What are you interested in?"
+        elif any(w in msg_lower for w in ["policy", "terms", "warranty", "privacy"]):
+            response_text = "Our return policy allows returns within 30 days. Items must be in original condition. Would you like more details about a specific policy?"
+        elif any(w in msg_lower for w in ["human", "agent", "person", "talk"]):
+            response_text = "I understand you'd like to speak with a human agent. Let me connect you with our support team. They'll be with you shortly."
         else:
-            response_text = "Thank you for your message. A support agent will assist you shortly. In the meantime, please share any order numbers or details about your inquiry."
+            response_text = "Thank you for your message. I'm here to help with orders, products, refunds, and general inquiries. What can I assist you with today?"
 
     return {
         "message": response_text,

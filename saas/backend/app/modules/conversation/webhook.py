@@ -165,6 +165,24 @@ async def whatsapp_webhook(workspace_id: str, request: Request):
                         text=result["response"],
                     )
                     db.add(response_msg)
+                    db.commit()
+
+                    # Send via WhatsApp API
+                    try:
+                        import httpx
+                        from app.modules.core.config import Settings
+                        settings = Settings()
+                        phone_number_id = settings.whatsapp_phone_number_id
+                        token = settings.whatsapp_access_token
+                        async with httpx.AsyncClient() as client:
+                            await client.post(
+                                f"https://graph.facebook.com/v21.0/{phone_number_id}/messages",
+                                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                                json={"messaging_product": "whatsapp", "to": sender, "type": "text", "text": {"body": result["response"]}},
+                                timeout=15,
+                            )
+                    except Exception as e:
+                        logger.error(f"Failed to send WhatsApp response: {e}")
 
                 db.commit()
 

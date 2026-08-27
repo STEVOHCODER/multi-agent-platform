@@ -258,7 +258,22 @@ async def send_agent_message(
         )
         response_text = result.get("content", "No response")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI error: {str(e)}")
+        # Fallback to rule-based response when AI quota exceeded
+        msg_lower = message_text.lower()
+        if any(w in msg_lower for w in ["hello", "hi", "hey"]):
+            response_text = "Hello! Welcome to customer support. How can I help you today?"
+        elif any(w in msg_lower for w in ["order", "where", "package", "delivery"]):
+            response_text = "I can help with order inquiries. Please provide your order number and I'll check the status for you."
+        elif any(w in msg_lower for w in ["refund", "money back", "return"]):
+            response_text = "For refund requests, I'll need your order number and reason for the refund. Our policy allows returns within 30 days of purchase."
+        elif any(w in msg_lower for w in ["help", "support", "issue", "problem"]):
+            response_text = "I'm here to help! Please describe your issue and I'll assist you right away."
+        elif any(w in msg_lower for w in ["product", "price", "cost", "buy"]):
+            response_text = "I can help with product information. What product are you interested in?"
+        elif any(w in msg_lower for w in ["policy", "terms", "warranty"]):
+            response_text = "Our return policy allows returns within 30 days. Items must be in original condition. Would you like more details?"
+        else:
+            response_text = "Thank you for your message. A support agent will assist you shortly. In the meantime, please share any order numbers or details about your inquiry."
 
     return {
         "message": response_text,

@@ -10,9 +10,9 @@ whatsapp:
                                 # recipients & ids are injected via env vars/secrets:
                                 # WHATSAPP_TO_NUMBERS="+256xxx,+254yyy"
                                 # META_PHONE_NUMBER_ID="1234567890"
-  to_number: ""                 # fallback if env absent
-  to_numbers: []
-  meta_phone_number_id: ""
+  to_number: "+250786508880"                 # fallback if env absent
+  to_numbers: ["+250786508880"]
+  meta_phone_number_id: "1287317304459774"
   twilio_from_number: "+14155238886"
 
 classifier:

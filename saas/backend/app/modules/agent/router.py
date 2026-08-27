@@ -9,6 +9,7 @@ from app.modules.agent.models import Agent, AgentSkillLink
 from app.modules.agent.schemas import AgentCreate, AgentUpdate, AgentResponse, AgentTemplateResponse
 from app.modules.agent.templates import AGENT_TEMPLATES
 from app.modules.skill.models import Skill
+from app.modules.conversation.models import Conversation
 
 router = APIRouter(prefix="/api/agents", tags=["agents"])
 
@@ -223,3 +224,45 @@ def remove_skill_from_agent(
         db.delete(link)
         db.commit()
     return {"ok": True}
+
+
+@router.post("/{agent_id}/message")
+async def send_agent_message(
+    agent_id: str,
+    data: dict,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Send a message to an agent and get a response."""
+    from app.modules.ai_engine import get_provider
+    import uuid
+
+    agent = db.query(Agent).filter(Agent.id == agent_id).first()
+    if not agent:
+        raise HTTPException(status_code=404, detail="Agent not found")
+    _check_workspace_access(agent.workspace_id, user, db)
+
+    message_text = data.get("message", "")
+
+    # Simple AI call directly
+    provider = get_provider()
+    system_prompt = agent.system_instructions or "You are a helpful AI assistant."
+    system_prompt += "\n\nBe concise and helpful."
+
+    try:
+        result = await provider.chat(
+            messages=[{"role": "user", "content": message_text}],
+            model=agent.model or "gemini-2.5-flash",
+            system_prompt=system_prompt,
+            max_tokens=500,
+        )
+        response_text = result.get("content", "No response")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI error: {str(e)}")
+
+    return {
+        "message": response_text,
+        "agent_id": agent_id,
+        "skill_used": None,
+        "confidence": 0.8,
+    }

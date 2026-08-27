@@ -130,7 +130,7 @@ class GoogleProvider(AIProvider):
 
     async def chat(self, messages, model=None, system_prompt=None, temperature=0.7, max_tokens=2000, tools=None):
         import httpx
-        model = model or "gemini-2.0-flash"
+        model = model or "gemini-2.5-flash"
 
         contents = []
         if system_prompt:

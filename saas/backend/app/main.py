@@ -26,7 +26,10 @@ _worker_task = None
 
 
 async def _start_worker():
-    await start_worker_loop(interval_seconds=settings.poll_interval_seconds)
+    try:
+        await start_worker_loop(interval_seconds=settings.poll_interval_seconds)
+    except Exception:
+        pass
 
 
 @asynccontextmanager
